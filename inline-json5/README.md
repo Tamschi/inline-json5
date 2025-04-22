@@ -2,7 +2,7 @@
 
 This is a small crate to write [`JsonValue`](https://docs.rs/json/latest/json/enum.JsonValue.html)s in Rust using JSON5 syntax.
 
-So far it doesn't support interpolation, but has great error highlighting.
+It supports interpolation in parentheses and has great error highlighting.
 (The macro recovers at each `,` or closing delimiter and can report further errors afterwards.)
 
 ```rust

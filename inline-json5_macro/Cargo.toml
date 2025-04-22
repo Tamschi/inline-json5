@@ -7,7 +7,7 @@ description = "Supporting crate for inline-json5. (Loess demo project.)"
 repository = "https://github.com/Tamschi/inline-json5"
 readme = true
 
-publish = false
+publish = true
 
 [lib]
 proc-macro = true

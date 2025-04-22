@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "inline-json5"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "inline-json5_macro",
  "json",
@@ -12,7 +12,7 @@ dependencies = [
 
 [[package]]
 name = "inline-json5_macro"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "loess",
  "proc-macro2",

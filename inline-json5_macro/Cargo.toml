@@ -1,6 +1,6 @@
 [package]
 name = "inline-json5_macro"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 description = "Supporting crate for inline-json5. (Loess demo project.)"

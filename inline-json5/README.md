@@ -6,6 +6,9 @@ So far it doesn't support interpolation, but has great error highlighting.
 (The macro recovers at each `,` or closing delimiter and can report further errors afterwards.)
 
 ```rust
+use inline_json5::json5;
+use json::JsonValue;
+
 // Example taken from <https://json5.org/>, modified.
 let _ = json5!({
     // comments
@@ -19,6 +22,7 @@ No \\n's!",
     nan: NaN,
     infinity: infinity,
     negative_infinity: -infinity,
+    json_value: (JsonValue::Null),
     trailingComma: "in objects", andIn: ["arrays",],
     "backwardsCompatible": "with JSON",
 });

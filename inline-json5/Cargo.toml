@@ -5,6 +5,7 @@ edition = "2024"
 license = "MIT OR Apache-2.0"
 description = "A macro to write `json` values with pure JSON5 syntax."
 repository = "https://github.com/Tamschi/inline-json5"
+readme = true
 
 publish = false
 

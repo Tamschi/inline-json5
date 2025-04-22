@@ -1,6 +1,6 @@
 [package]
 name = "inline-json5"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 description = "A macro to write `json` values with pure JSON5 syntax."
@@ -10,5 +10,5 @@ readme = true
 publish = false
 
 [dependencies]
-inline-json5_macro = { version = "0.1", path = "../inline-json5_macro" }
+inline-json5_macro = { version = "0.1.2", path = "../inline-json5_macro" }
 json = "0.12"

@@ -7,7 +7,7 @@ use proc_macro2::{Delimiter, Group, Literal, Span, TokenStream, TokenTree};
 mod tokens;
 use tokens::{
 	Braces, Colon, Comma, Delimited, False, Identifier, Infinity, Minus, NaN, Null, NumberLiteral,
-	Plus, SquareBrackets, String, True,
+	Parentheses, Plus, SquareBrackets, String, True,
 };
 
 #[proc_macro]
@@ -59,6 +59,7 @@ grammar! {
 		True(True),
 		False(False),
 		Null(Null),
+		InlineRust(InlineRust),
 	} else "Expected JSON5 value."; // The error message that's used when no variant is peeked successfully.
 
 	struct Array: PeekFrom, PopFrom (SquareBrackets<Delimited<Value, Comma>>);
@@ -95,6 +96,27 @@ grammar! {
 		Finite(NumberLiteral), // This could be a structured variant too, but `grammar!` doesn't support that yet.
 		Infinity(Infinity),
 	} else "Expected number literal or `infinity`.";
+
+	struct InlineRust: PeekFrom, PopFrom (Parentheses);
+}
+
+impl Value {
+	/// Uses for narrowing the input range in which property errors are reported.
+	fn span(&self) -> Span {
+		match self {
+			Value::String(s) => s.0.span(),
+			Value::Number(number) => match number {
+				Number::NaN(nan) => nan.0.span(),
+				Number::NotNaN(not_nan) => not_nan.amount.span(),
+			},
+			Value::Object(object) => object.0.span.join(),
+			Value::Array(array) => array.0.span.join(),
+			Value::True(t) => t.0.span(),
+			Value::False(f) => f.0.span(),
+			Value::Null(n) => n.0.span(),
+			Value::InlineRust(inline_rust) => inline_rust.0.span.join(),
+		}
+	}
 }
 
 /// [`NotNaN`] starts with an [`Option`], which isn't peekable since that's error-prone in [`grammar!`].
@@ -119,11 +141,13 @@ impl IntoTokens for Object {
 				);
 				{#for (property, comma) in self.0.contents.0,
 					{#let Property { key, colon, value } = property;}
-					object.insert(
-						{#paste key }
-						{#located_at colon.0.span(), , }
-						{#paste value }
-					)
+					{#located_at value.span(),
+						object.insert(
+							{#paste key }
+							{#located_at colon.0.span(), , }
+							{#paste value }
+						)
+					}
 					{#located_at comma.map(|comma| comma.0.span()).unwrap_or(self.0.span.close()), ; }
 				}
 				object
@@ -154,7 +178,9 @@ impl IntoTokens for Array {
 					{#paste Literal::usize_unsuffixed(self.0.contents.0.len()) }
 				);
 				{#for (item, comma) in self.0.contents.0,
-					vec.push({#paste item })
+					{#located_at item.span(),
+						vec.push({#paste item })
+					}
 					{#located_at comma.map(|comma| comma.0.span()).unwrap_or(self.0.span.close()), ; }
 				}
 				vec
@@ -269,6 +295,13 @@ impl IntoTokens for String {
 				{#paste self.0 }.to_string()
 			)
 		]);
+	}
+}
+
+impl IntoTokens for InlineRust {
+	fn into_tokens(self, root: &TokenStream, tokens: &mut impl Extend<TokenTree>) {
+		// Unwrap from parentheses.
+		self.0.contents.into_tokens(root, tokens)
 	}
 }
 

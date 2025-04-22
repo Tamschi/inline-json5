@@ -3,7 +3,7 @@
 use std::f64::{INFINITY, NEG_INFINITY};
 
 use inline_json5::json5;
-use json::number::NAN;
+use json::{JsonValue, number::NAN};
 
 #[test]
 pub fn example() {
@@ -21,6 +21,7 @@ pub fn example() {
 		nan: NaN,
 		infinity: infinity,
 		negative_infinity: -infinity,
+		json_value: (JsonValue::Null),
 		trailingComma: "in objects", andIn: ["arrays",],
 		"backwardsCompatible": "with JSON",
 	});
@@ -36,6 +37,7 @@ pub fn example() {
 		nan: NAN,
 		infinity: INFINITY,
 		negative_infinity: NEG_INFINITY,
+		json_value: JsonValue::Null,
 		trailingComma: "in objects", andIn: ["arrays",],
 		"backwardsCompatible": "with JSON",
 	};

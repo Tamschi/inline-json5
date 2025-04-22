@@ -174,6 +174,51 @@ impl<T: PopFrom> PopFrom for Braces<T> {
 	}
 }
 
+/// `(` [`T`](`TokenStream`) `)`
+pub struct Parentheses<T = TokenStream> {
+	pub contents: T,
+	pub span: DelimSpan,
+}
+
+impl<T> PeekFrom for Parentheses<T> {
+	fn peek_from(input: &Input) -> bool {
+		// If your grammar is more complex, you may need to require `T: PeekFrom` and check inside.
+		// Here that's not needed, though.
+		matches!(input.front(), Some(TokenTree::Group(group)) if group.delimiter() == Delimiter::Parenthesis)
+	}
+}
+
+impl<T: PopFrom> PopFrom for Parentheses<T> {
+	fn pop_from(input: &mut Input, errors: &mut Errors) -> Result<Self, ()> {
+		input
+			.pop_or_replace(|tts, _| match tts {
+				[TokenTree::Group(group)] if group.delimiter() == Delimiter::Parenthesis => {
+					let mut input = Input {
+						tokens: group.stream().into_iter().collect(),
+						end: group.span_close(),
+					};
+					let this = match T::pop_from(&mut input, errors) {
+						Ok(contents) => Self {
+							contents,
+							span: group.delim_span(),
+						},
+						Err(()) => return Err([group.into()]),
+					};
+					if !input.is_empty() {
+						errors.push(Error::new(
+							ErrorPriority::UNCONSUMED_IN_DELIMITER,
+							"Unconsumed token inside `(…)`.",
+							[input.front_span()],
+						));
+					}
+					Ok(this)
+				}
+				other => Err(other),
+			})
+			.map_err(|spans| errors.push(Error::new(ErrorPriority::TOKEN, "Expected `(`.", spans)))
+	}
+}
+
 macro_rules! punctuation {
     ($($name:ident $char:literal),*$(,)?) => {$(
         // It's not really necessary to capture the `Punct` here,

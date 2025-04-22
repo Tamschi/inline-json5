@@ -1,0 +1,3 @@
+[workspace]
+resolver = "3"
+members = ["inline-json5", "inline-json5_macro"]

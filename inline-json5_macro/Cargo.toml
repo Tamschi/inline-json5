@@ -1,0 +1,17 @@
+[package]
+name = "inline-json5_macro"
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+description = "Supporting crate for inline-json5. (Loess demo project.)"
+repository = "https://github.com/Tamschi/inline-json5"
+readme = true
+
+publish = false
+
+[lib]
+proc-macro = true
+
+[dependencies]
+loess = "0.2.1"
+proc-macro2 = "1.0.95"

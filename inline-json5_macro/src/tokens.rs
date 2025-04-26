@@ -177,7 +177,6 @@ impl<T: PopFrom> PopFrom for Braces<T> {
 /// `(` [`T`](`TokenStream`) `)`
 pub struct Parentheses<T = TokenStream> {
 	pub contents: T,
-	pub span: DelimSpan,
 }
 
 impl<T> PeekFrom for Parentheses<T> {
@@ -198,10 +197,7 @@ impl<T: PopFrom> PopFrom for Parentheses<T> {
 						end: group.span_close(),
 					};
 					let this = match T::pop_from(&mut input, errors) {
-						Ok(contents) => Self {
-							contents,
-							span: group.delim_span(),
-						},
+						Ok(contents) => Self { contents },
 						Err(()) => return Err([group.into()]),
 					};
 					if !input.is_empty() {

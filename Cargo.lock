@@ -26,9 +26,9 @@ checksum = "078e285eafdfb6c4b434e0d31e8cfcb5115b651496faca5749b88fafd4f23bfd"
 
 [[package]]
 name = "loess"
-version = "0.2.2"
+version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7d0a9f9a6c07585a555fc619c7f3086bc5a8b42161bcdbebf5404760123168bb"
+checksum = "721f03e41e264aabe443da0313212f1384ff3b1da4ca8130150be8f5359a0861"
 dependencies = [
  "proc-macro2",
 ]

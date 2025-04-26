@@ -12,5 +12,5 @@ publish = false
 proc-macro = true
 
 [dependencies]
-loess = "0.2.1"
+loess = "0.2.3"
 proc-macro2 = "1.0.95"

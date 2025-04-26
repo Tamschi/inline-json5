@@ -38,10 +38,10 @@ fn json5_(input: TokenStream) -> TokenStream {
 	if let Some(value) = value {
 		value.into_tokens(&root, &mut output)
 	} else {
-		quote_into_mixed_site!(Span::mixed_site(), &root, &mut output, [
-			{#error "Expected JSON5 value."}
+		quote_into_mixed_site!(Span::mixed_site(), &root, &mut output, {
+			{#error { "Expected JSON5 value." }}
 			{#root}::json::JsonValue::Null
-		])
+		})
 	}
 
 	// This is a value macro but those `compile_error!`s are statements,
@@ -133,26 +133,25 @@ impl PeekFrom for NotNaN {
 
 impl IntoTokens for Object {
 	fn into_tokens(self, root: &TokenStream, tokens: &mut impl Extend<TokenTree>) {
-		quote_into_mixed_site!(self.0.span.join(), root, tokens, [
+		quote_into_mixed_site!(self.0.span.join(), root, tokens, {
 			{#root}::json::JsonValue::Object({
 				let mut object = {#root}::json::object::Object::with_capacity(
-					// Whoops, I forgot to implement `IntoTokens` for `Literal`.
-					{#paste Literal::usize_unsuffixed(self.0.contents.0.len()) }
+					{#(Literal::usize_unsuffixed(self.0.contents.0.len()))}
 				);
-				{#for (property, comma) in self.0.contents.0,
+				{#for (property, comma) in self.0.contents.0 {
 					{#let Property { key, colon, value } = property;}
-					{#located_at value.span(),
+					{#located_at(value.span()) {
 						object.insert(
-							{#paste key }
-							{#located_at colon.0.span(), , }
-							{#paste value }
+							{#(key)}
+							{#located_at(colon.0.span()) { , }}
+							{#(value)}
 						)
-					}
-					{#located_at comma.map(|comma| comma.0.span()).unwrap_or(self.0.span.close()), ; }
-				}
+					}}
+					{#located_at(comma.map(|comma| comma.0.span()).unwrap_or(self.0.span.close())) { ; }}
+				}}
 				object
 			})
-		])
+		})
 	}
 }
 
@@ -171,21 +170,20 @@ impl IntoTokens for Key {
 
 impl IntoTokens for Array {
 	fn into_tokens(self, root: &TokenStream, tokens: &mut impl Extend<TokenTree>) {
-		quote_into_mixed_site!(self.0.span.join(), root, tokens, [
+		quote_into_mixed_site!(self.0.span.join(), root, tokens, {
 			{#root}::json::JsonValue::Array({
 				let mut vec = {#root}::std::vec::Vec::with_capacity(
-					// Whoops, I forgot to implement `IntoTokens` for `Literal`.
-					{#paste Literal::usize_unsuffixed(self.0.contents.0.len()) }
+					{#(Literal::usize_unsuffixed(self.0.contents.0.len()))}
 				);
-				{#for (item, comma) in self.0.contents.0,
-					{#located_at item.span(),
-						vec.push({#paste item })
-					}
-					{#located_at comma.map(|comma| comma.0.span()).unwrap_or(self.0.span.close()), ; }
-				}
+				{#for (item, comma) in self.0.contents.0 {
+					{#located_at(item.span()) {
+						vec.push({#(item)});
+					}}
+					{#located_at(comma.map(|comma| comma.0.span()).unwrap_or(self.0.span.close())) { ; }}
+				}}
 				vec
 			})
-		])
+		})
 	}
 }
 
@@ -199,13 +197,13 @@ impl IntoTokens for Number {
 			}) => sign.span().join(amount.span()).unwrap_or(amount.span()),
 			Number::NotNaN(NotNaN { sign: None, amount }) => amount.span(),
 		};
-		quote_into_mixed_site!(span, root, tokens, [
+		quote_into_mixed_site!(span, root, tokens, {
 			{#root}::json::JsonValue::Number(
-				{#match self,
+				{#match self {
 					Self::NaN(_) => { {#root}::json::number::NAN }
 					Self::NotNaN(NotNaN { sign, amount }) => {
 						{#root}::core::convert::From::from(
-							{#match (sign, amount),
+							{#match (sign, amount) {
 								(Some(Sign::Minus(_)), Amount::Infinity(_)) => {
 									{#root}::core::f64::NEG_INFINITY
 								}
@@ -213,15 +211,15 @@ impl IntoTokens for Number {
 									{#root}::core::f64::INFINITY
 								}
 								(Some(Sign::Minus(minus)), amount) => {
-									{#paste minus } {#paste amount }
+									{#(minus)} {#(amount)}
 								}
-								(_, amount) => { {#paste amount } }
-							}
+								(_, amount) => { {#(amount)} }
+							}}
 						)
 					}
-				}
+				}}
 			)
-		])
+		})
 	}
 }
 
@@ -266,35 +264,35 @@ impl IntoTokens for Amount {
 
 impl IntoTokens for True {
 	fn into_tokens(self, root: &TokenStream, tokens: &mut impl Extend<TokenTree>) {
-		quote_into_mixed_site!(self.0.span(), root, tokens, [
+		quote_into_mixed_site!(self.0.span(), root, tokens, {
 			{#root}::json::JsonValue::Boolean(true)
-		]);
+		});
 	}
 }
 
 impl IntoTokens for False {
 	fn into_tokens(self, root: &TokenStream, tokens: &mut impl Extend<TokenTree>) {
-		quote_into_mixed_site!(self.0.span(), root, tokens, [
+		quote_into_mixed_site!(self.0.span(), root, tokens, {
 			{#root}::json::JsonValue::Boolean(false)
-		]);
+		});
 	}
 }
 
 impl IntoTokens for Null {
 	fn into_tokens(self, root: &TokenStream, tokens: &mut impl Extend<TokenTree>) {
-		quote_into_mixed_site!(self.0.span(), root, tokens, [
+		quote_into_mixed_site!(self.0.span(), root, tokens, {
 			{#root}::json::JsonValue::Null
-		]);
+		});
 	}
 }
 
 impl IntoTokens for String {
 	fn into_tokens(self, root: &TokenStream, tokens: &mut impl Extend<TokenTree>) {
-		quote_into_mixed_site!(self.0.span(), root, tokens, [
+		quote_into_mixed_site!(self.0.span(), root, tokens, {
 			{#root}::json::JsonValue::String(
-				{#paste self.0 }.to_string()
+				{#(self.0)}.to_string()
 			)
-		]);
+		});
 	}
 }
 

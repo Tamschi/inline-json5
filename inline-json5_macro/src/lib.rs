@@ -128,7 +128,9 @@ impl IntoTokens for Object {
 							{#(value)}
 						)
 					}}
-					{#located_at(comma.map(|comma| comma.0.span()).unwrap_or(self.0.span.close())) { ; }}
+					{#located_at(comma.map(|comma| comma.0.span()).unwrap_or(self.0.span.close())) {
+						;
+					}}
 				}}
 				object
 			})
@@ -160,7 +162,9 @@ impl IntoTokens for Array {
 					{#located_at(Span::mixed_site()) {
 						vec.push({#(item)});
 					}}
-					{#located_at(comma.map(|comma| comma.0.span()).unwrap_or(self.0.span.close())) { ; }}
+					{#located_at(comma.map(|comma| comma.0.span()).unwrap_or(self.0.span.close())) {
+						;
+					}}
 				}}
 				vec
 			})
@@ -192,7 +196,7 @@ impl IntoTokens for Number {
 									{#root}::core::f64::INFINITY
 								}
 								(Some(Sign::Minus(minus)), amount) => {
-									{#(minus)} {#(amount)}
+									{#(minus, amount)}
 								}
 								(_, amount) => { {#(amount)} }
 							}}
